@@ -3,11 +3,13 @@ import { getCurrentUser } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { TrendingUp } from "lucide-react";
 
-export default async function DashboardPage(){
-    const user = await getCurrentUser();
-    const userId = user.id;
-
-    const [totalProducts, lowStock, allProducts] = await Promise.all([
+export default async function DashboardPage() {
+  const user = await getCurrentUser();
+  const aa = await prisma.product.findMany();
+  console.log("All data : ", aa);
+  const userId = user.id;
+  console.log("qwerty: ",userId);
+  const [totalProducts, lowStock, allProducts] = await Promise.all([
     prisma.product.count({ where: { userId } }),
     prisma.product.count({
       where: {
@@ -21,10 +23,34 @@ export default async function DashboardPage(){
       select: { price: true, quantity: true, createdAt: true },
     }),
   ]);
+ console.log("data aayena 1:"+totalProducts);
 
-    return(
-        <div className="min-h-screen bg-gray-50"><Sidebar currentPath="/dashboard"/>
-        <main className="ml-64 p-8">
+  const totalValue = allProducts.reduce(
+    (sum, product) => sum + Number(product.price) * Number(product.quantity),
+    0
+  );
+
+  const inStockCount = allProducts.filter((p) => Number(p.quantity) > 5).length;
+
+  const lowStockCount = allProducts.filter(
+    (p) => Number(p.quantity) <= 5 && Number(p.quantity) >= 1
+  ).length;
+
+  const outOfStockCount = allProducts.filter(
+    (p) => Number(p.quantity) === 0
+  ).length;
+
+  const inStockPercentage =
+    totalProducts > 0 ? Math.round((inStockCount / totalProducts) * 100) : 0;
+  const lowStockPercentage =
+    totalProducts > 0 ? Math.round((lowStockCount / totalProducts) * 100) : 0;
+  const outOfStockPercentage =
+    totalProducts > 0 ? Math.round((outOfStockCount / totalProducts) * 100) : 0;
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Sidebar currentPath="/dashboard" />
+      <main className="ml-64 p-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
@@ -38,7 +64,7 @@ export default async function DashboardPage(){
             </div>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Key Metrics */}
           <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -91,7 +117,7 @@ export default async function DashboardPage(){
               <h2>New products per week</h2>
             </div>
             <div className="h-48">
-              <ProductsChart data={weeklyProductsData} />
+              {/* <ProductsChart data={weeklyProductsData} /> */}
             </div>
           </div>
         </div>
@@ -105,7 +131,7 @@ export default async function DashboardPage(){
               </h2>
             </div>
             <div className="space-y-3">
-              {recent.map((product, key) => {
+              {/* {recent.map((product, key) => {
                 const stockLevel =
                   product.quantity === 0
                     ? 0
@@ -143,7 +169,7 @@ export default async function DashboardPage(){
                     </div>
                   </div>
                 );
-              })}
+              })} */}
             </div>
           </div>
 
@@ -197,6 +223,6 @@ export default async function DashboardPage(){
           </div>
         </div>
       </main>
-        </div>
-    );
+    </div>
+  );
 }

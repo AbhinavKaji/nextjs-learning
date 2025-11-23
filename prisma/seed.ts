@@ -1,7 +1,7 @@
 import { PrismaClient, Prisma } from "@/generated/prisma/client";
 
 const prisma = new PrismaClient();
-const demoUserId = "133767f0-768d-4338-a612-50c8dc722b84";
+const demoUserId = "ff5c68a4-bd6f-4c71-940c-40775913d24e";
 
 const productData: Prisma.ProductCreateInput[] = Array.from({ length: 25 }).map((_, i) => ({
       userId: demoUserId,
